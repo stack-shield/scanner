@@ -1,0 +1,58 @@
+{
+    "name": "stackshield/scanner",
+    "description": "Run Laravel security posture checks locally from inside your application. Config and runtime checks that pair with StackShield's outside-in scanning. No account required.",
+    "keywords": [
+        "laravel",
+        "security",
+        "scanner",
+        "audit",
+        "static-analysis",
+        "devsecops",
+        "ci",
+        "composer-audit",
+        "security-headers"
+    ],
+    "homepage": "https://github.com/stackshield/scanner",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "StackShield",
+            "homepage": "https://stackshield.io"
+        }
+    ],
+    "require": {
+        "php": "^8.2",
+        "composer/semver": "^3.4",
+        "illuminate/console": "^10.0 || ^11.0 || ^12.0",
+        "illuminate/contracts": "^10.0 || ^11.0 || ^12.0",
+        "illuminate/http": "^10.0 || ^11.0 || ^12.0",
+        "illuminate/support": "^10.0 || ^11.0 || ^12.0"
+    },
+    "require-dev": {
+        "orchestra/testbench": "^8.0 || ^9.0 || ^10.0",
+        "phpunit/phpunit": "^10.5 || ^11.0",
+        "laravel/pint": "^1.13"
+    },
+    "autoload": {
+        "psr-4": {
+            "StackShield\\Scanner\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "StackShield\\Scanner\\Tests\\": "tests/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "StackShield\\Scanner\\ScannerServiceProvider"
+            ]
+        }
+    },
+    "config": {
+        "sort-packages": true
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true
+}

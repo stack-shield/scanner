@@ -1,0 +1,89 @@
+name: 'StackShield Laravel Security Scan'
+description: 'Run StackShield inside-view Laravel security checks and publish findings to the GitHub Security tab.'
+author: 'StackShield'
+
+branding:
+  icon: 'shield'
+  color: 'blue'
+
+inputs:
+  fail-on:
+    description: 'Severity that fails the build: critical, high, medium or low.'
+    required: false
+    default: 'critical'
+  working-directory:
+    description: 'Directory containing the Laravel application.'
+    required: false
+    default: '.'
+  sarif-file:
+    description: 'Where to write the SARIF report.'
+    required: false
+    default: 'stackshield.sarif'
+  upload-sarif:
+    description: 'Upload the SARIF report to GitHub code scanning. Needs security-events: write.'
+    required: false
+    default: 'true'
+  url:
+    description: 'Optional URL to also scan from the outside, combining both views into one deploy scan.'
+    required: false
+    default: ''
+  token:
+    description: 'StackShield project token. Only needed to report results or scan a URL.'
+    required: false
+    default: ''
+  app-env:
+    description: 'APP_ENV to evaluate against. Severity is environment-conditional, so production is usually what you want.'
+    required: false
+    default: 'production'
+  offline:
+    description: 'Skip checks that need the network, which is the dependency audit against Packagist.'
+    required: false
+    default: 'false'
+
+outputs:
+  sarif-file:
+    description: 'Path to the generated SARIF report.'
+    value: ${{ inputs.sarif-file }}
+  exit-code:
+    description: 'Exit code from the scan. Non-zero means a finding at or above fail-on.'
+    value: ${{ steps.scan.outputs.exit-code }}
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Run StackShield scan
+      id: scan
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      env:
+        APP_ENV: ${{ inputs.app-env }}
+        STACKSHIELD_TOKEN: ${{ inputs.token }}
+      run: |
+        set +e
+        args=(--format=sarif --output="${{ inputs.sarif-file }}" --fail-on="${{ inputs.fail-on }}")
+        [ "${{ inputs.offline }}" = "true" ] && args+=(--offline)
+        if [ -n "${{ inputs.url }}" ]; then
+          args+=(--url="${{ inputs.url }}" --report --register)
+        fi
+        php artisan stackshield:scan "${args[@]}"
+        code=$?
+        set -e
+        echo "exit-code=$code" >> "$GITHUB_OUTPUT"
+        # The SARIF upload must still run when the scan fails, otherwise the
+        # findings that caused the failure never reach the Security tab. The
+        # build is failed at the end instead.
+        exit 0
+
+    - name: Upload SARIF to code scanning
+      if: ${{ inputs.upload-sarif == 'true' && hashFiles(format('{0}/{1}', inputs.working-directory, inputs.sarif-file)) != '' }}
+      uses: github/codeql-action/upload-sarif@v3
+      with:
+        sarif_file: ${{ inputs.working-directory }}/${{ inputs.sarif-file }}
+        category: stackshield-inside
+
+    - name: Fail the build if the scan found something
+      if: ${{ steps.scan.outputs.exit-code != '0' }}
+      shell: bash
+      run: |
+        echo "::error title=StackShield::Scan found a finding at or above '${{ inputs.fail-on }}'. See the Security tab for detail."
+        exit 1
