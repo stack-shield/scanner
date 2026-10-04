@@ -8,10 +8,15 @@ controls. It is the inside view. It pairs with StackShield's outside view, the
 verified scan of what attackers actually see, but it needs no account and makes
 no network calls to StackShield unless you give it a token.
 
-```
-composer require --dev stackshield/scanner
+```bash
+composer config repositories.stackshield-scanner vcs https://github.com/stack-shield/scanner.git
+composer require --dev stackshield/scanner:dev-main
 php artisan stackshield:scan
 ```
+
+The package is available from this public GitHub repository. It is not yet
+listed on Packagist, so the VCS repository entry and `dev-main` constraint are
+needed for Composer installation until the first package release.
 
 ## What this checks
 
