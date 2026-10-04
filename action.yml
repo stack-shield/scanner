@@ -58,12 +58,16 @@ runs:
       env:
         APP_ENV: ${{ inputs.app-env }}
         STACKSHIELD_TOKEN: ${{ inputs.token }}
+        STACKSHIELD_FAIL_ON: ${{ inputs.fail-on }}
+        STACKSHIELD_SARIF_FILE: ${{ inputs.sarif-file }}
+        STACKSHIELD_OFFLINE: ${{ inputs.offline }}
+        STACKSHIELD_URL: ${{ inputs.url }}
       run: |
         set +e
-        args=(--format=sarif --output="${{ inputs.sarif-file }}" --fail-on="${{ inputs.fail-on }}")
-        [ "${{ inputs.offline }}" = "true" ] && args+=(--offline)
-        if [ -n "${{ inputs.url }}" ]; then
-          args+=(--url="${{ inputs.url }}" --report --register)
+        args=(--format=sarif --output="$STACKSHIELD_SARIF_FILE" --fail-on="$STACKSHIELD_FAIL_ON")
+        [ "$STACKSHIELD_OFFLINE" = "true" ] && args+=(--offline)
+        if [ -n "$STACKSHIELD_URL" ]; then
+          args+=(--url="$STACKSHIELD_URL" --report --register)
         fi
         php artisan stackshield:scan "${args[@]}"
         code=$?
@@ -84,6 +88,8 @@ runs:
     - name: Fail the build if the scan found something
       if: ${{ steps.scan.outputs.exit-code != '0' }}
       shell: bash
+      env:
+        STACKSHIELD_FAIL_ON: ${{ inputs.fail-on }}
       run: |
-        echo "::error title=StackShield::Scan found a finding at or above '${{ inputs.fail-on }}'. See the Security tab for detail."
+        echo "::error title=StackShield::Scan found a finding at or above '$STACKSHIELD_FAIL_ON'. See the Security tab for detail."
         exit 1

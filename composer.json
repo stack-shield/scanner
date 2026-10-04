@@ -12,7 +12,7 @@
         "composer-audit",
         "security-headers"
     ],
-    "homepage": "https://github.com/stackshield/scanner",
+    "homepage": "https://github.com/stack-shield/scanner",
     "license": "MIT",
     "authors": [
         {

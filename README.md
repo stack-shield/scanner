@@ -156,7 +156,7 @@ jobs:
         with: { php-version: '8.3' }
       - run: composer install --no-interaction --prefer-dist
 
-      - uses: stackshield/scanner@v1
+      - uses: stack-shield/scanner@v1
         with:
           fail-on: high
 ```
@@ -168,7 +168,7 @@ To combine the inside checks with an external scan of a deployed URL, pass a URL
 and a token:
 
 ```yaml
-      - uses: stackshield/scanner@v1
+      - uses: stack-shield/scanner@v1
         with:
           fail-on: critical
           url: ${{ vars.STAGING_URL }}
