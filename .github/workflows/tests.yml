@@ -35,6 +35,11 @@ jobs:
         run: |
           composer require "illuminate/support:${{ matrix.laravel }}" --no-interaction --no-update
           composer require --dev "orchestra/testbench:${{ matrix.testbench }}" --no-interaction --no-update
+          # Laravel 10/11 have no advisory-free releases left; compatibility
+          # tests install them only inside this disposable CI runner.
+          if [ "${{ matrix.laravel }}" != '12.*' ]; then
+            composer config policy.advisories.block false
+          fi
           composer update --with-all-dependencies --prefer-dist --no-interaction --no-progress
 
       - name: Run tests
