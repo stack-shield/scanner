@@ -20,6 +20,9 @@ jobs:
           - { php: '8.4', laravel: '11.*', testbench: '^9.0' }
           - { php: '8.3', laravel: '12.*', testbench: '^10.0' }
           - { php: '8.4', laravel: '12.*', testbench: '^10.0' }
+          - { php: '8.3', laravel: '13.*', testbench: '^11.0' }
+          - { php: '8.4', laravel: '13.*', testbench: '^11.0' }
+          - { php: '8.5', laravel: '13.*', testbench: '^11.0' }
 
     name: PHP ${{ matrix.php }} / Laravel ${{ matrix.laravel }}
 
@@ -37,7 +40,7 @@ jobs:
           composer require --dev "orchestra/testbench:${{ matrix.testbench }}" --no-interaction --no-update
           # Laravel 10/11 have no advisory-free releases left; compatibility
           # tests install them only inside this disposable CI runner.
-          if [ "${{ matrix.laravel }}" != '12.*' ]; then
+          if [ "${{ matrix.laravel }}" != '12.*' ] && [ "${{ matrix.laravel }}" != '13.*' ]; then
             composer config policy.advisories.block false
           fi
           composer update --with-all-dependencies --prefer-dist --no-interaction --no-progress

@@ -10,13 +10,13 @@ no network calls to StackShield unless you give it a token.
 
 ```bash
 composer config repositories.stackshield-scanner vcs https://github.com/stack-shield/scanner.git
-composer require --dev stackshield/scanner:dev-main
+composer require --dev stackshield/scanner:^1.0
 php artisan stackshield:scan
 ```
 
-The package is available from this public GitHub repository. It is not yet
-listed on Packagist, so the VCS repository entry and `dev-main` constraint are
-needed for Composer installation until the first package release.
+Supports Laravel 10, 11, 12 and 13 on PHP 8.2 or later. Until the Packagist
+listing is live, the VCS repository entry above is what lets Composer find the
+package.
 
 ## What this checks
 

@@ -28,6 +28,7 @@ class EolDates
         '10' => '2025-02-04',
         '11' => '2026-03-12',
         '12' => '2027-03-01',
+        '13' => '2028-03-17',
     ];
 
     public static function laravelEolDate(string $version): ?string
