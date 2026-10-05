@@ -5,6 +5,8 @@ namespace StackShield\Scanner\Tests;
 use Illuminate\Support\Facades\Http;
 use StackShield\Scanner\Checks\AppKeyCheck;
 use StackShield\Scanner\Checks\CorsConfigurationCheck;
+use StackShield\Scanner\Checks\CsrfExemptionsCheck;
+use StackShield\Scanner\Checks\CsrfProtectionCheck;
 use StackShield\Scanner\Checks\DebugModeCheck;
 use StackShield\Scanner\Checks\DependencyAuditCheck;
 use StackShield\Scanner\Checks\SessionStorageCheck;
@@ -71,6 +73,38 @@ class ChecksTest extends TestCase
         $result = (new SessionStorageCheck)->run($this->context());
 
         $this->assertSame(CheckResult::FAIL, $result->status);
+    }
+
+    public function test_csrf_protection_passes_on_the_framework_default_web_group(): void
+    {
+        // The default group registers ValidateCsrfToken on Laravel 11 and 12 and
+        // PreventRequestForgery on Laravel 13. Both are CSRF protection.
+        $result = (new CsrfProtectionCheck)->run($this->context());
+
+        $this->assertSame(CheckResult::PASS, $result->status);
+    }
+
+    public function test_csrf_exemptions_include_paths_registered_in_bootstrap(): void
+    {
+        $class = class_exists('Illuminate\\Foundation\\Http\\Middleware\\PreventRequestForgery')
+            ? 'Illuminate\\Foundation\\Http\\Middleware\\PreventRequestForgery'
+            : 'Illuminate\\Foundation\\Http\\Middleware\\VerifyCsrfToken';
+
+        if (! method_exists($class, 'except')) {
+            $this->markTestSkipped('This Laravel version has no static CSRF exclusion list.');
+        }
+
+        // What ->validateCsrfTokens(except: [...]) in bootstrap/app.php does.
+        $class::except(['*']);
+
+        try {
+            $result = (new CsrfExemptionsCheck)->run($this->context());
+        } finally {
+            $class::flushState();
+        }
+
+        $this->assertSame(CheckResult::FAIL, $result->status);
+        $this->assertSame('high', $result->severity);
     }
 
     public function test_dependency_audit_skipped_when_offline(): void

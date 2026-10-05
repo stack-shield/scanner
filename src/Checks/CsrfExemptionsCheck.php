@@ -7,12 +7,14 @@ use StackShield\Scanner\Results\CheckResult;
 
 /**
  * The CSRF exclusion list. Broad wildcards or a large number of exemptions widen
- * the CSRF attack surface. Reads the middleware instance's except list.
+ * the CSRF attack surface. Reads the middleware's excluded paths, which on
+ * Laravel 11+ include the static list registered in bootstrap/app.php.
  */
 class CsrfExemptionsCheck extends AbstractCheck
 {
     protected const CANDIDATES = [
         'App\\Http\\Middleware\\VerifyCsrfToken',
+        'Illuminate\\Foundation\\Http\\Middleware\\PreventRequestForgery',
         'Illuminate\\Foundation\\Http\\Middleware\\VerifyCsrfToken',
     ];
 
@@ -58,6 +60,9 @@ class CsrfExemptionsCheck extends AbstractCheck
             }
             try {
                 $instance = app($class);
+                if (method_exists($instance, 'getExcludedPaths')) {
+                    return (array) $instance->getExcludedPaths();
+                }
                 $ref = new \ReflectionClass($instance);
                 if (! $ref->hasProperty('except')) {
                     continue;

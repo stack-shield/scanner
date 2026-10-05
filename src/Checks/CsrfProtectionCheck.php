@@ -7,9 +7,16 @@ use StackShield\Scanner\Results\CheckResult;
 
 class CsrfProtectionCheck extends AbstractCheck
 {
+    /**
+     * Laravel 10 apps ship their own VerifyCsrfToken, Laravel 11 and 12 register
+     * ValidateCsrfToken, and Laravel 13 registers PreventRequestForgery, the class
+     * both of the older names now extend. Matching is by is_a, so subclasses count.
+     */
     protected const CANDIDATES = [
         'App\\Http\\Middleware\\VerifyCsrfToken',
         'Illuminate\\Foundation\\Http\\Middleware\\VerifyCsrfToken',
+        'Illuminate\\Foundation\\Http\\Middleware\\ValidateCsrfToken',
+        'Illuminate\\Foundation\\Http\\Middleware\\PreventRequestForgery',
     ];
 
     public function slug(): string
