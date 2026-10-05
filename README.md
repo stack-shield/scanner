@@ -9,14 +9,11 @@ verified scan of what attackers actually see, but it needs no account and makes
 no network calls to StackShield unless you give it a token.
 
 ```bash
-composer config repositories.stackshield-scanner vcs https://github.com/stack-shield/scanner.git
-composer require --dev stackshield/scanner:^1.0
+composer require --dev stackshield/scanner
 php artisan stackshield:scan
 ```
 
-Supports Laravel 10, 11, 12 and 13 on PHP 8.2 or later. Until the Packagist
-listing is live, the VCS repository entry above is what lets Composer find the
-package.
+Supports Laravel 10, 11, 12 and 13 on PHP 8.2 or later.
 
 ## What this checks
 
